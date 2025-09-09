@@ -14,18 +14,15 @@ class ViewController: UIViewController {
     let tableView = UITableView()
     let titleLabel = UILabel()
     var searchBar = UISearchBar()
-    var articleList: [ArticleDetails] = []
-    var visibleList: [ArticleDetails] = []
-    var networkManager = NetworkManager.shared
-  
+    var articleViewModel: ArticleViewModel = ArticleViewModel()
+
     //MARK: View Lifecycle Methods
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupDelegates()
         setupUI()
-        getDataFromServer { [weak self] in
-            self?.visibleList = self?.articleList ?? []
+        articleViewModel.getDataFromServer { [weak self] in
             self?.tableView.reloadData()
         }
     }
@@ -36,14 +33,14 @@ class ViewController: UIViewController {
 extension ViewController: UITableViewDataSource{
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        visibleList.count
+        articleViewModel.getNumberOfRows()
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: ArticleTableCell.reuseIdentifier, for: indexPath) as? ArticleTableCell else {
             return UITableViewCell()
         }
-        cell.loadCellData(article: visibleList[indexPath.row])
+        cell.loadCellData(article: articleViewModel.getArticle(at: indexPath.row))
         return cell
     }
 }
@@ -52,7 +49,7 @@ extension ViewController: UITableViewDataSource{
 
 extension ViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        applyFilter(searchText)
+        articleViewModel.applyFilter(searchText)
         tableView.reloadData()
     }
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
@@ -62,7 +59,7 @@ extension ViewController: UISearchBarDelegate {
         searchBar.text = nil
         searchBar.resignFirstResponder()
         searchBar.showsCancelButton = false
-        applyFilter("")
+        articleViewModel.applyFilter("")
         tableView.reloadData()
     }
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
@@ -111,26 +108,5 @@ extension ViewController {
     func setupDelegates() {
         tableView.dataSource = self
         searchBar.delegate = self
-    }
-    
-    func getDataFromServer(completion: (() -> Void)? = nil) {
-        networkManager.getArticles(from: Server.endPoint.rawValue) { [weak self] fetchedList in
-            guard let self = self else { return }
-            self.articleList = fetchedList
-            DispatchQueue.main.async {
-                completion?()
-            }
-        }
-    }
-    
-    func applyFilter(_ text: String) {
-        let query = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !query.isEmpty else {
-            visibleList = articleList
-            return
-        }
-        visibleList = articleList.filter {
-            $0.author?.lowercased().range(of: query, options: [.caseInsensitive, .diacriticInsensitive]) != nil || $0.description?.lowercased().range(of: query, options: [.caseInsensitive, .diacriticInsensitive]) != nil
-        }
     }
 }
