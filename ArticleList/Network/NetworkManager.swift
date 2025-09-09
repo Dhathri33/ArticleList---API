@@ -9,7 +9,8 @@ import Foundation
 
 protocol NetworkManagerProtocol {
     
-    func getArticles(from serverUrl: String, closure: @escaping ([ArticleDetails]) -> Void)
+    func getData(from serverUrl: String?, closure: @escaping (Data?) -> Void)
+    func parse(data: Data?) -> [ArticleDetails]
     
 }
 
@@ -17,29 +18,42 @@ class NetworkManager: NetworkManagerProtocol {
     
     static let shared = NetworkManager()
     
-    func getArticles(from serverUrl: String, closure: @escaping ([ArticleDetails]) -> Void) {
-        guard let serverURL = URL(string: serverUrl) else {
+    func getData(from serverUrl: String?, closure: @escaping (Data?) -> Void) {
+        guard let imageUrl = serverUrl, let serverURL = URL(string: imageUrl) else {
             print("Server URL is invalid")
+            closure(nil)
             return
         }
         
         URLSession.shared.dataTask(with: serverURL) { data, response, error in
             if let error = error {
                 print("Error fetching data: \(error)")
+                closure(nil)
                 return
             }
             
             guard let data = data else {
                 print("No data returned from the server")
+                closure(nil)
                 return
             }
             
-            do {
-                let decodedResponse = try JSONDecoder().decode(ArticleList.self, from: data)
-                closure(decodedResponse.articles)
-            } catch {
-                print("Error parsing JSON: \(error)")
-            }
+            closure(data)
         }.resume()
+    }
+    
+    func parse(data: Data?) -> [ArticleDetails] {
+        guard let data = data else {
+            print("No data to parse")
+            return []
+        }
+        do {
+            let decoder = JSONDecoder()
+            let fetchedResult = try decoder.decode(ArticleList.self, from: data)
+            return fetchedResult.articles
+        } catch {
+            print(error)
+        }
+        return []
     }
 }

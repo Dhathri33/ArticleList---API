@@ -7,6 +7,7 @@
 @testable import ArticleList
 
 class MockArticleViewModel: ArticleViewModelProtocol{
+
     var articleList: [ArticleDetails] = []
     
     var visibleList: [ArticleDetails] = []
@@ -24,6 +25,17 @@ class MockArticleViewModel: ArticleViewModelProtocol{
     
     func getDataFromServer(completion: (() -> Void)?) {
         articleList = []
+    }
+    
+    func applyFilter(_ text: String) {
+        let query = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else {
+            visibleList = articleList
+            return
+        }
+        visibleList = articleList.filter {
+            $0.author?.lowercased().range(of: query, options: [.caseInsensitive, .diacriticInsensitive]) != nil || $0.description?.lowercased().range(of: query, options: [.caseInsensitive, .diacriticInsensitive]) != nil
+        }
     }
     
 }

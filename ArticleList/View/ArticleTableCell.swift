@@ -12,11 +12,47 @@ class ArticleTableCell: UITableViewCell {
     //MARK: Properties
     
     static let reuseIdentifier = "ArticleTableCell"
-    let titleLabel = UILabel()
-    let postDetailsLabel = UILabel()
-    let uploadImageView = UIImageView(image: UIImage(systemName: "square.and.arrow.up"))
-    let dateLabel = UILabel()
-    let articleImageView = UIImageView()
+    
+    let titleLabel = {
+        let titleLabel = UILabel()
+        titleLabel.font = UIFont.systemFont(ofSize: 17, weight: .semibold)
+        titleLabel.textColor = .systemBlue
+        titleLabel.numberOfLines = 0
+        return titleLabel
+    }()
+    
+    let postDetailsLabel = {
+        let postDetailsLabel = UILabel()
+        postDetailsLabel.font = UIFont.systemFont(ofSize: 15, weight: .regular)
+        postDetailsLabel.textColor = .secondaryLabel
+        postDetailsLabel.numberOfLines = 0
+        return postDetailsLabel
+    }()
+    
+    let uploadImageView = {
+        let uploadImageView = UIImageView(image: UIImage(systemName: "square.and.arrow.up"))
+        uploadImageView.tintColor = .systemBlue
+        uploadImageView.contentMode = .scaleAspectFit
+        uploadImageView.setContentHuggingPriority(.required, for: .horizontal)
+        return uploadImageView
+    }()
+    
+    let dateLabel = {
+        let dateLabel = UILabel()
+        dateLabel.font = UIFont.systemFont(ofSize: 13, weight: .regular)
+        dateLabel.textColor = .tertiaryLabel
+        return dateLabel
+    }()
+    
+    let articleImageView = {
+        let articleImageView = UIImageView()
+        articleImageView.contentMode = .scaleAspectFill
+        articleImageView.clipsToBounds = true
+        articleImageView.layer.cornerRadius = 8
+        articleImageView.setContentHuggingPriority(.required, for: .horizontal)
+        articleImageView.setContentCompressionResistancePriority(.required, for: .horizontal)
+        return articleImageView
+    }()
         
     //MARK: Initializers for UITableViewCell
     
@@ -34,22 +70,8 @@ class ArticleTableCell: UITableViewCell {
 
 extension ArticleTableCell {
     func setupUI() {
+        
         backgroundColor = .white
-        
-        titleLabel.font = UIFont.systemFont(ofSize: 17, weight: .semibold)
-        titleLabel.textColor = .systemBlue
-        titleLabel.numberOfLines = 0
-        
-        postDetailsLabel.font = UIFont.systemFont(ofSize: 15, weight: .regular)
-        postDetailsLabel.textColor = .secondaryLabel
-        postDetailsLabel.numberOfLines = 0
-        
-        uploadImageView.tintColor = .systemBlue
-        uploadImageView.contentMode = .scaleAspectFit
-        uploadImageView.setContentHuggingPriority(.required, for: .horizontal)
-        
-        dateLabel.font = UIFont.systemFont(ofSize: 13, weight: .regular)
-        dateLabel.textColor = .tertiaryLabel
         
         let dateRow = UIStackView(arrangedSubviews: [uploadImageView, dateLabel, UIView()])
         dateRow.axis = .horizontal
@@ -59,12 +81,6 @@ extension ArticleTableCell {
         let textStack = UIStackView(arrangedSubviews: [titleLabel, postDetailsLabel, dateRow])
         textStack.axis = .vertical
         textStack.spacing = 8
-        
-        articleImageView.contentMode = .scaleAspectFill
-        articleImageView.clipsToBounds = true
-        articleImageView.layer.cornerRadius = 8
-        articleImageView.setContentHuggingPriority(.required, for: .horizontal)
-        articleImageView.setContentCompressionResistancePriority(.required, for: .horizontal)
         
         let imageStackView = UIStackView(arrangedSubviews: [UIView(),articleImageView,UIView()])
         imageStackView.axis = .vertical
@@ -94,24 +110,15 @@ extension ArticleTableCell {
         
         titleLabel.text = article.author ?? ""
         postDetailsLabel.text = article.description ?? ""
+        dateLabel.text = article.publishedDateOnly
         
-        if let publishedAt = article.publishedAt, publishedAt.count >= 10 {
-            dateLabel.text = String(publishedAt.prefix(10))
-        } else {
-            dateLabel.text = ""
-        }
-    
-        if let urlString = article.urlToImage, let url = URL(string: urlString) {
-            URLSession.shared.dataTask(with: url) { [weak self] data, _, error in
-                guard let self = self else { return }
-                if let data = data, error == nil {
-                    DispatchQueue.main.async {
-                        self.articleImageView.image = UIImage(data: data)
-                    }
-                }
-            }.resume()
-        } else {
-            articleImageView.image = nil
-        }
+        NetworkManager.shared.getData(from: article.urlToImage, closure: { [weak self] data in
+            guard let data = data else { return }
+            
+            // convert imageData into UIImage
+            DispatchQueue.main.async {
+                self?.articleImageView.image = UIImage(data: data)
+            }
+        })
     }
 }

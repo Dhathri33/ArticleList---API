@@ -12,6 +12,7 @@ protocol ArticleViewModelProtocol {
     func getNumberOfRows() -> Int
     func getArticle(at index: Int) -> ArticleDetails
     func getDataFromServer(completion: (() -> Void)?)
+    func applyFilter(_ text: String)
 }
 
 class ArticleViewModel: ArticleViewModelProtocol{
@@ -33,10 +34,12 @@ class ArticleViewModel: ArticleViewModelProtocol{
     }
         
     func getDataFromServer(completion: (() -> Void)?) {
-        networkManager.getArticles(from: Server.endPoint.rawValue) { [weak self] fetchedList in
+        networkManager.getData(from: Server.endPoint.rawValue) { [weak self] fetchedData in
             guard let self = self else { return }
-            self.articleList = fetchedList
+            
+            self.articleList = networkManager.parse(data: fetchedData)
             self.visibleList = articleList
+            
             DispatchQueue.main.async {
                 completion?()
             }

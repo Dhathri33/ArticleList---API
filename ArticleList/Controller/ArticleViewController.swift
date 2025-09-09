@@ -7,15 +7,47 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class ArticleViewController: UIViewController {
     
     //MARK: Properties
-    
-    let tableView = UITableView()
-    let titleLabel = UILabel()
-    var searchBar = UISearchBar()
-    var articleViewModel: ArticleViewModel = ArticleViewModel()
 
+    let titleLabel = {
+        let titleLabel = UILabel()
+        titleLabel.text = "News"
+        titleLabel.textColor = .systemBlue
+        titleLabel.font = UIFont(name: "TimesNewRomanPS-BoldMT", size: 35)
+        titleLabel.textAlignment = .left
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        return titleLabel
+    }()
+    
+    let searchBar = {
+        let searchBar = UISearchBar()
+        searchBar.placeholder = "Search News"
+        searchBar.sizeToFit()
+        return searchBar
+    }()
+    
+    let tableView = {
+        let tableView = UITableView()
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.register(ArticleTableCell.self, forCellReuseIdentifier: ArticleTableCell.reuseIdentifier)
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 250
+        return tableView
+    }()
+    
+    var articleViewModel: ArticleViewModelProtocol!
+
+    init(viewModel: ArticleViewModelProtocol) {
+        super.init(nibName: nil, bundle: nil)
+        articleViewModel = viewModel
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     //MARK: View Lifecycle Methods
     
     override func viewDidLoad() {
@@ -30,7 +62,7 @@ class ViewController: UIViewController {
 
 //MARK: TableView DataSource Methods
 
-extension ViewController: UITableViewDataSource{
+extension ArticleViewController: UITableViewDataSource{
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         articleViewModel.getNumberOfRows()
@@ -47,7 +79,7 @@ extension ViewController: UITableViewDataSource{
 
 //MARK: Search Delegate Methods
 
-extension ViewController: UISearchBarDelegate {
+extension ArticleViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         articleViewModel.applyFilter(searchText)
         tableView.reloadData()
@@ -69,26 +101,12 @@ extension ViewController: UISearchBarDelegate {
 
 //MARK: Helper functions
 
-extension ViewController {
+extension ArticleViewController {
     
     func setupUI() {
         
         view.backgroundColor = .white
-        
-        titleLabel.text = "News"
-        titleLabel.textColor = .systemBlue
-        titleLabel.font = UIFont(name: "TimesNewRomanPS-BoldMT", size: 35)
-        titleLabel.textAlignment = .left
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        
-        searchBar.placeholder = "Search News"
-        searchBar.sizeToFit()
         tableView.tableHeaderView = searchBar
-        
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.register(ArticleTableCell.self, forCellReuseIdentifier: ArticleTableCell.reuseIdentifier)
-        tableView.rowHeight = UITableView.automaticDimension
-        tableView.estimatedRowHeight = 250
         
         let vStack = UIStackView(arrangedSubviews: [titleLabel, tableView])
         vStack.axis = .vertical
@@ -99,7 +117,7 @@ extension ViewController {
         NSLayoutConstraint.activate([
             vStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             vStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            vStack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 32),
+            vStack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
             tableView.heightAnchor.constraint(equalToConstant: 680),
             tableView.widthAnchor.constraint(equalToConstant: 393)
         ])
