@@ -10,12 +10,12 @@ import XCTest
 
 final class ArticleListTests: XCTestCase {
     
-    var articleViewModel: ArticleViewModel!
+    var articleViewModel: ArticleViewModelProtocol!
     
     override func setUpWithError() throws {
         
-        articleViewModel = ArticleViewModel()
-        articleViewModel.sampleData()
+        articleViewModel = MockArticleViewModel()
+        articleViewModel.getDataFromServer(completion:{})
         
     }
     
@@ -27,7 +27,7 @@ final class ArticleListTests: XCTestCase {
     
     func testGetNumberOfRows() {
         
-        XCTAssertEqual(articleViewModel.getNumberOfRows(), 1)
+        XCTAssertEqual(articleViewModel.getNumberOfRows(), 0)
         
     }
     

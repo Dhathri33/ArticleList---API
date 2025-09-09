@@ -6,7 +6,15 @@
 //
 import Foundation
 
-class ArticleViewModel {
+protocol ArticleViewModelProtocol {
+    var articleList: [ArticleDetails] { get set}
+    var visibleList: [ArticleDetails] { get set}
+    func getNumberOfRows() -> Int
+    func getArticle(at index: Int) -> ArticleDetails
+    func getDataFromServer(completion: (() -> Void)?)
+}
+
+class ArticleViewModel: ArticleViewModelProtocol{
     
     var articleList: [ArticleDetails] = []
     var visibleList: [ArticleDetails] = []
@@ -24,7 +32,7 @@ class ArticleViewModel {
         return visibleList[index]
     }
         
-    func getDataFromServer(completion: (() -> Void)? = nil) {
+    func getDataFromServer(completion: (() -> Void)?) {
         networkManager.getArticles(from: Server.endPoint.rawValue) { [weak self] fetchedList in
             guard let self = self else { return }
             self.articleList = fetchedList
@@ -45,8 +53,5 @@ class ArticleViewModel {
             $0.author?.lowercased().range(of: query, options: [.caseInsensitive, .diacriticInsensitive]) != nil || $0.description?.lowercased().range(of: query, options: [.caseInsensitive, .diacriticInsensitive]) != nil
         }
     }
-    
-    func sampleData() {
-        visibleList = [ArticleDetails(author: "Dhathri" , description: "She is a working professional", urlToImage: "image", publishedAt: "today")]
-    }
 }
+
