@@ -7,7 +7,13 @@
 
 import Foundation
 
-class NetworkManager {
+protocol NetworkManagerProtocol {
+    
+    func getArticles(from serverUrl: String, closure: @escaping ([ArticleDetails]) -> Void)
+    
+}
+
+class NetworkManager: NetworkManagerProtocol {
     
     static let shared = NetworkManager()
     

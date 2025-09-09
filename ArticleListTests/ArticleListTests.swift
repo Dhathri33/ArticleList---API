@@ -9,15 +9,23 @@ import XCTest
 @testable import ArticleList
 
 final class ArticleListTests: XCTestCase {
-
+    
+    var articleViewModel: ArticleViewModel!
+    
     override func setUpWithError() throws {
         
-
-    }
-
-    override func tearDownWithError() throws {
-    
+        articleViewModel = ArticleViewModel()
         
     }
-
+    
+    override func tearDownWithError() throws {
+        
+        articleViewModel = nil
+        
+    }
+    
+    func testGetNumberOfRows() {
+        XCTAssertEqual(articleViewModel.getNumberOfRows(), 0)
+    }
 }
+
