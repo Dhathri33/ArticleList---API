@@ -15,6 +15,7 @@ final class ArticleListTests: XCTestCase {
     override func setUpWithError() throws {
         
         articleViewModel = ArticleViewModel()
+        articleViewModel.sampleData()
         
     }
     
@@ -25,7 +26,18 @@ final class ArticleListTests: XCTestCase {
     }
     
     func testGetNumberOfRows() {
-        XCTAssertEqual(articleViewModel.getNumberOfRows(), 0)
+        
+        XCTAssertEqual(articleViewModel.getNumberOfRows(), 1)
+        
+    }
+    
+    func testSampleData() {
+        
+        XCTAssertNotNil(articleViewModel.getArticle(at: 0))
+        XCTAssertEqual(articleViewModel.getArticle(at: 0).author, "Dhathri")
+        XCTAssertEqual(articleViewModel.getArticle(at: 0).urlToImage, "image")
+        XCTAssertEqual(articleViewModel.getArticle(at: 0).publishedAt, "today")
+
     }
 }
 

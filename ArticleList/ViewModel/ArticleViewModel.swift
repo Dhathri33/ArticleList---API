@@ -10,7 +10,11 @@ class ArticleViewModel {
     
     var articleList: [ArticleDetails] = []
     var visibleList: [ArticleDetails] = []
-    var networkManager = NetworkManager.shared
+    private let networkManager: NetworkManagerProtocol
+
+    init(networkManager: NetworkManagerProtocol = NetworkManager.shared) {
+        self.networkManager = networkManager
+    }
     
     func getNumberOfRows() -> Int {
         return visibleList.count
@@ -40,5 +44,9 @@ class ArticleViewModel {
         visibleList = articleList.filter {
             $0.author?.lowercased().range(of: query, options: [.caseInsensitive, .diacriticInsensitive]) != nil || $0.description?.lowercased().range(of: query, options: [.caseInsensitive, .diacriticInsensitive]) != nil
         }
+    }
+    
+    func sampleData() {
+        visibleList = [ArticleDetails(author: "Dhathri" , description: "She is a working professional", urlToImage: "image", publishedAt: "today")]
     }
 }
