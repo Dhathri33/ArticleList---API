@@ -102,6 +102,9 @@ extension DetailsViewController {
                 self?.articleImageView.image = UIImage(data: data)
             }
         })
+        if article?.comments != nil {
+            commentsTextField.text = article?.comments
+        }
     }
     
     @objc func backToPreviousScreen() {

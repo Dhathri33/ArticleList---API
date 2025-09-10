@@ -84,9 +84,11 @@ extension ArticleViewController: UITableViewDelegate {
         let selectedArticle = articleViewModel.getArticle(at: indexPath.row)
         let detailsVC = DetailsViewController()
         detailsVC.article = selectedArticle
-        detailsVC.closure = { article in
-                                print(article ?? "")
-                            }
+        detailsVC.closure = { [weak self] updatedArticle in
+            guard let self = self, let updatedArticle = updatedArticle else { return }
+            self.articleViewModel.updateArticleList(row: indexPath.row, updatedArticle: updatedArticle)
+            self.tableView.reloadRows(at: [indexPath], with: .none)
+            }
         navigationController?.pushViewController(detailsVC, animated: true)
     }
 }

@@ -13,6 +13,7 @@ protocol ArticleViewModelProtocol {
     func getArticle(at index: Int) -> ArticleDetails
     func getDataFromServer(completion: (() -> Void)?)
     func applyFilter(_ text: String)
+    func updateArticleList(row: Int, updatedArticle: ArticleDetails)
 }
 
 class ArticleViewModel: ArticleViewModelProtocol{
@@ -55,6 +56,11 @@ class ArticleViewModel: ArticleViewModelProtocol{
         visibleList = articleList.filter {
             $0.author?.lowercased().range(of: query, options: [.caseInsensitive, .diacriticInsensitive]) != nil || $0.description?.lowercased().range(of: query, options: [.caseInsensitive, .diacriticInsensitive]) != nil
         }
+    }
+    
+    func updateArticleList(row: Int, updatedArticle: ArticleDetails) {
+        articleList[row] = updatedArticle
+        visibleList[row] = updatedArticle
     }
 }
 
