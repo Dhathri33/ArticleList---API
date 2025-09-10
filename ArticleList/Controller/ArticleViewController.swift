@@ -84,6 +84,9 @@ extension ArticleViewController: UITableViewDelegate {
         let selectedArticle = articleViewModel.getArticle(at: indexPath.row)
         let detailsVC = DetailsViewController()
         detailsVC.article = selectedArticle
+        detailsVC.closure = { article in
+                                print(article ?? "")
+                            }
         navigationController?.pushViewController(detailsVC, animated: true)
     }
 }

@@ -10,6 +10,7 @@ struct ArticleDetails: Decodable {
     let description: String?
     let urlToImage: String?
     let publishedAt: String?
+    var comments: String?
     
     var publishedDateOnly: String {
         guard let publishedAt = publishedAt, publishedAt.count >= 10 else { return "" }

@@ -12,6 +12,7 @@ class DetailsViewController: UIViewController {
     //MARK: Properties
     
     var article: ArticleDetails?
+    var closure: ((ArticleDetails?) -> Void?)? = nil
     
     var titleLabel: UILabel = {
         let titleLabel = UILabel()
@@ -31,11 +32,22 @@ class DetailsViewController: UIViewController {
         descriptionLabel.numberOfLines = 0
         return descriptionLabel
     }()
+    
+    var commentsTextField: UITextField = {
+        let commentsTextField = UITextField()
+        commentsTextField.placeholder = "Add a comment..."
+        commentsTextField.borderStyle = .roundedRect
+        commentsTextField.textColor = .black
+        commentsTextField.translatesAutoresizingMaskIntoConstraints = false
+        commentsTextField.font = .systemFont(ofSize: 17)
+        return commentsTextField
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         configureData()
+        
     }
     
 }
@@ -48,23 +60,34 @@ extension DetailsViewController {
         title = "Details"
         view.backgroundColor = .systemBackground
         
-        let vStack = UIStackView(arrangedSubviews: [titleLabel, descriptionLabel])
+        let vStack = UIStackView(arrangedSubviews: [titleLabel, descriptionLabel, commentsTextField])
         vStack.axis = .vertical
         vStack.alignment = .leading
         vStack.spacing = 12
         vStack.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(vStack)
         
+        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(backToPreviousScreen))
+        
         NSLayoutConstraint.activate([
             vStack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
             vStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             vStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            titleLabel.widthAnchor.constraint(equalToConstant: 500)
+            titleLabel.widthAnchor.constraint(equalToConstant: 500),
+            commentsTextField.heightAnchor.constraint(equalToConstant: 100),
+            commentsTextField.widthAnchor.constraint(equalToConstant: 500)
         ])
     }
     
     func configureData() {
         titleLabel.text = article?.author ?? "Unknown Author"
         descriptionLabel.text = article?.description ?? "No description available"
+    }
+    
+    @objc func backToPreviousScreen() {
+        article?.comments = commentsTextField.text
+        guard let closure = closure else { return }
+        closure(article)
+        self.navigationController?.popViewController(animated: true)
     }
 }
