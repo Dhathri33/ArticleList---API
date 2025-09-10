@@ -10,7 +10,7 @@ import UIKit
 class ArticleViewController: UIViewController {
     
     //MARK: Properties
-
+    
     let titleLabel = {
         let titleLabel = UILabel()
         titleLabel.text = "News"
@@ -38,6 +38,12 @@ class ArticleViewController: UIViewController {
     }()
     
     var articleViewModel: ArticleViewModelProtocol!
+    private var searchDebounce: DispatchWorkItem?
+    private let debounceInterval: TimeInterval = 1.0 // 1s;
+
+    deinit {
+        searchDebounce?.cancel()
+    }
 
     init(viewModel: ArticleViewModelProtocol) {
         super.init(nibName: nil, bundle: nil)
@@ -97,13 +103,21 @@ extension ArticleViewController: UITableViewDelegate {
 
 extension ArticleViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        articleViewModel.applyFilter(searchText)
-        tableView.reloadData()
+        searchDebounce?.cancel()
+        let text = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let workItem = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
+            self.articleViewModel.applyFilter(text)
+            self.tableView.reloadData()
+        }
+        searchDebounce = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + debounceInterval, execute: workItem)
     }
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
         searchBar.showsCancelButton = true
     }
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchDebounce?.cancel()
         searchBar.text = nil
         searchBar.resignFirstResponder()
         searchBar.showsCancelButton = false
@@ -111,6 +125,10 @@ extension ArticleViewController: UISearchBarDelegate {
         tableView.reloadData()
     }
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchDebounce?.cancel()
+        let text = (searchBar.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        articleViewModel.applyFilter(text)
+        tableView.reloadData()
         searchBar.resignFirstResponder()
     }
 }
