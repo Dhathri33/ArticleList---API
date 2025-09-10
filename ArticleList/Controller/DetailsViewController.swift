@@ -78,6 +78,7 @@ extension DetailsViewController {
         view.addSubview(vStack)
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(backToPreviousScreen))
+        navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .save, target: self, action: #selector(saveComment))
         
         NSLayoutConstraint.activate([
             vStack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
@@ -108,6 +109,10 @@ extension DetailsViewController {
     }
     
     @objc func backToPreviousScreen() {
+        self.navigationController?.popViewController(animated: true)
+    }
+    
+    @objc func saveComment() {
         article?.comments = commentsTextField.text
         guard let closure = closure else { return }
         closure(article)
