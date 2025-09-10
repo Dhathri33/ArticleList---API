@@ -77,6 +77,17 @@ extension ArticleViewController: UITableViewDataSource{
     }
 }
 
+//MARK: TableView Delegate Methods
+
+extension ArticleViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let selectedArticle = articleViewModel.getArticle(at: indexPath.row)
+        let detailsVC = DetailsViewController()
+        detailsVC.article = selectedArticle
+        navigationController?.pushViewController(detailsVC, animated: true)
+    }
+}
+
 //MARK: Search Delegate Methods
 
 extension ArticleViewController: UISearchBarDelegate {
@@ -125,6 +136,7 @@ extension ArticleViewController {
     
     func setupDelegates() {
         tableView.dataSource = self
+        tableView.delegate = self
         searchBar.delegate = self
     }
 }
