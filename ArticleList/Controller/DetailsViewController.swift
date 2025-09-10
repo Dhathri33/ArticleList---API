@@ -42,6 +42,16 @@ class DetailsViewController: UIViewController {
         commentsTextField.font = .systemFont(ofSize: 17)
         return commentsTextField
     }()
+    
+    var articleImageView = {
+        let articleImageView = UIImageView()
+        articleImageView.contentMode = .scaleAspectFill
+        articleImageView.clipsToBounds = true
+        articleImageView.layer.cornerRadius = 8
+        articleImageView.setContentHuggingPriority(.required, for: .horizontal)
+        articleImageView.setContentCompressionResistancePriority(.required, for: .horizontal)
+        return articleImageView
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -60,7 +70,7 @@ extension DetailsViewController {
         title = "Details"
         view.backgroundColor = .systemBackground
         
-        let vStack = UIStackView(arrangedSubviews: [titleLabel, descriptionLabel, commentsTextField])
+        let vStack = UIStackView(arrangedSubviews: [titleLabel,articleImageView,  descriptionLabel, commentsTextField])
         vStack.axis = .vertical
         vStack.alignment = .leading
         vStack.spacing = 12
@@ -74,14 +84,24 @@ extension DetailsViewController {
             vStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             vStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             titleLabel.widthAnchor.constraint(equalToConstant: 500),
-            commentsTextField.heightAnchor.constraint(equalToConstant: 100),
-            commentsTextField.widthAnchor.constraint(equalToConstant: 500)
+            commentsTextField.heightAnchor.constraint(equalToConstant: 80),
+            commentsTextField.widthAnchor.constraint(equalToConstant: 500),
+            articleImageView.heightAnchor.constraint(equalToConstant: 300),
+            articleImageView.widthAnchor.constraint(equalToConstant: 500)
         ])
     }
     
     func configureData() {
         titleLabel.text = article?.author ?? "Unknown Author"
         descriptionLabel.text = article?.description ?? "No description available"
+        NetworkManager.shared.getData(from: article?.urlToImage, closure: { [weak self] data in
+            guard let data = data else { return }
+            
+            // convert imageData into UIImage
+            DispatchQueue.main.async {
+                self?.articleImageView.image = UIImage(data: data)
+            }
+        })
     }
     
     @objc func backToPreviousScreen() {
