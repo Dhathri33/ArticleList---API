@@ -112,12 +112,23 @@ extension ArticleTableCell {
         postDetailsLabel.text = article.description ?? ""
         dateLabel.text = article.publishedDateOnly
         
-        NetworkManager.shared.getData(from: article.urlToImage, closure: { [weak self] data in
-            guard let data = data else { return }
-            
+        var receivedImageData: Data?
+        NetworkManager.shared.getData(from: article.urlToImage, closure: { [weak self] fetchedState in
+            guard let self = self else { return }
+            switch fetchedState {
+            case .isLoading, .invalidURL, .errorFetchingData, .noDataFromServer:
+                DispatchQueue.main.async {
+                    self.articleImageView.image = UIImage(systemName: "photo.trianglebadge.exclamationmark.fill")
+                }
+                break
+            case .success(let fetchedData):
+                receivedImageData = fetchedData
+                break
+            }
             // convert imageData into UIImage
             DispatchQueue.main.async {
-                self?.articleImageView.image = UIImage(data: data)
+                guard let receivedImageData = receivedImageData else { return }
+                self.articleImageView.image = UIImage(data: receivedImageData)
             }
         })
     }

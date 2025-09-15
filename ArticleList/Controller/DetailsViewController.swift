@@ -13,6 +13,7 @@ class DetailsViewController: UIViewController {
     
     var article: ArticleDetails?
     var closure: ((ArticleDetails?) -> Void?)? = nil
+    var prefetchedImage: UIImage?
     
     var titleLabel: UILabel = {
         let titleLabel = UILabel()
@@ -52,14 +53,12 @@ class DetailsViewController: UIViewController {
         articleImageView.setContentCompressionResistancePriority(.required, for: .horizontal)
         return articleImageView
     }()
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         configureData()
-        
     }
-    
 }
 
 //MARK: Helper functions
@@ -95,14 +94,11 @@ extension DetailsViewController {
     func configureData() {
         titleLabel.text = article?.author ?? "Unknown Author"
         descriptionLabel.text = article?.description ?? "No description available"
-        NetworkManager.shared.getData(from: article?.urlToImage, closure: { [weak self] data in
-            guard let data = data else { return }
-            
-            // convert imageData into UIImage
-            DispatchQueue.main.async {
-                self?.articleImageView.image = UIImage(data: data)
-            }
-        })
+        if let image = prefetchedImage {
+            articleImageView.image = image
+        } else {
+            articleImageView.image = UIImage(systemName: "photo.trianglebadge.exclamationmark.fill")
+        }
         if article?.comments != nil {
             commentsTextField.text = article?.comments
         }

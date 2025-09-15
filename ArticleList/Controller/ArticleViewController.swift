@@ -60,8 +60,13 @@ class ArticleViewController: UIViewController {
         super.viewDidLoad()
         setupDelegates()
         setupUI()
-        articleViewModel.getDataFromServer { [weak self] in
-            self?.tableView.reloadData()
+        articleViewModel.getDataFromServer { [weak self] errorState in
+            guard let self = self else { return }
+            guard let _ = errorState else {
+                self.tableView.reloadData()
+                return
+            }
+            self.showAlert(title: "Hacker News", message: articleViewModel.errorMessage)
         }
     }
 }
@@ -89,6 +94,9 @@ extension ArticleViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedArticle = articleViewModel.getArticle(at: indexPath.row)
         let detailsVC = DetailsViewController()
+        if let cell = tableView.cellForRow(at: indexPath) as? ArticleTableCell {
+            detailsVC.prefetchedImage = cell.articleImageView.image
+        }
         detailsVC.article = selectedArticle
         detailsVC.closure = { [weak self] updatedArticle in
             guard let self = self, let updatedArticle = updatedArticle else { return }

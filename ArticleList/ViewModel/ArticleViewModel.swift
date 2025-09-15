@@ -9,9 +9,10 @@ import Foundation
 protocol ArticleViewModelProtocol {
     var articleList: [ArticleDetails] { get set}
     var visibleList: [ArticleDetails] { get set}
+    var errorMessage: String { get }
     func getNumberOfRows() -> Int
     func getArticle(at index: Int) -> ArticleDetails
-    func getDataFromServer(completion: (() -> Void)?)
+    func getDataFromServer(completion: ((NetworkState?) -> Void)?)
     func applyFilter(_ text: String)
     func updateArticleList(row: Int, updatedArticle: ArticleDetails)
 }
@@ -21,7 +22,8 @@ class ArticleViewModel: ArticleViewModelProtocol{
     var articleList: [ArticleDetails] = []
     var visibleList: [ArticleDetails] = []
     private let networkManager: NetworkManagerProtocol
-
+    var errorState: NetworkState?
+    
     init(networkManager: NetworkManagerProtocol = NetworkManager.shared) {
         self.networkManager = networkManager
     }
@@ -34,15 +36,22 @@ class ArticleViewModel: ArticleViewModelProtocol{
         return visibleList[index]
     }
         
-    func getDataFromServer(completion: (() -> Void)?) {
-        networkManager.getData(from: Server.endPoint.rawValue) { [weak self] fetchedData in
+    func getDataFromServer(completion: ((NetworkState?) -> Void)?) {
+        networkManager.getData(from: Server.endPoint.rawValue) { [weak self] fetchedState in
             guard let self = self else { return }
             
-            self.articleList = networkManager.parse(data: fetchedData)
-            self.visibleList = articleList
+            switch fetchedState {
+            case .isLoading, .invalidURL, .errorFetchingData, .noDataFromServer:
+                errorState = fetchedState
+                break
+            case .success(let fetchedData):
+                self.articleList = networkManager.parse(data: fetchedData)
+                self.visibleList = articleList
+                break
+            }
             
             DispatchQueue.main.async {
-                completion?()
+                completion?(self.errorState)
             }
         }
     }
@@ -61,6 +70,22 @@ class ArticleViewModel: ArticleViewModelProtocol{
     func updateArticleList(row: Int, updatedArticle: ArticleDetails) {
         articleList[row] = updatedArticle
         visibleList[row] = updatedArticle
+    }
+}
+
+extension ArticleViewModel {
+    var errorMessage: String {
+        guard let errorState = errorState else { return "" }
+        switch errorState {
+        case .invalidURL:
+            return "Invalid URL"
+        case .errorFetchingData:
+            return "Error fetching data"
+        case .noDataFromServer:
+            return "No data from server"
+        default :
+            return ""
+        }
     }
 }
 
