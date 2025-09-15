@@ -38,6 +38,7 @@ class ArticleViewController: UIViewController {
     }()
     
     var articleViewModel: ArticleViewModelProtocol!
+    var coordinatorFlowDelegate: ArticleListCoordinatorProtocol?
     private var searchDebounce: DispatchWorkItem?
     private let debounceInterval: TimeInterval = 1.0 // 1s;
 
@@ -92,18 +93,19 @@ extension ArticleViewController: UITableViewDataSource{
 
 extension ArticleViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedArticle = articleViewModel.getArticle(at: indexPath.row)
-        let detailsVC = DetailsViewController()
-        if let cell = tableView.cellForRow(at: indexPath) as? ArticleTableCell {
-            detailsVC.prefetchedImage = cell.articleImageView.image
-        }
-        detailsVC.article = selectedArticle
-        detailsVC.closure = { [weak self] updatedArticle in
-            guard let self = self, let updatedArticle = updatedArticle else { return }
-            self.articleViewModel.updateArticleList(row: indexPath.row, updatedArticle: updatedArticle)
+        
+        let selected = articleViewModel.getArticle(at: indexPath.row)
+        let image = (tableView.cellForRow(at: indexPath) as? ArticleTableCell)?.articleImageView.image
+        let closure: ((ArticleDetails?) -> Void?) = { [weak self] updated in
+            guard let self = self, let updated = updated else { return }
+            self.articleViewModel.updateArticleList(row: indexPath.row, updatedArticle: updated)
             self.tableView.reloadRows(at: [indexPath], with: .none)
-            }
-        navigationController?.pushViewController(detailsVC, animated: true)
+        }
+
+        coordinatorFlowDelegate?.showDetailScreen(
+            article: selected,
+            prefetchedImage: image,
+            onSave: closure)
     }
 }
 
