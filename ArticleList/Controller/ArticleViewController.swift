@@ -168,15 +168,15 @@ extension ArticleViewController {
         
         let vStack = UIStackView(arrangedSubviews: [titleLabel, tableView])
         vStack.axis = .vertical
-        vStack.spacing = 20
+        vStack.spacing = 10
         vStack.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(vStack)
         
         NSLayoutConstraint.activate([
             vStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             vStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            vStack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
-            tableView.heightAnchor.constraint(equalToConstant: 680),
+            vStack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
+            tableView.heightAnchor.constraint(equalToConstant: 600),
             tableView.widthAnchor.constraint(equalToConstant: 393),
             activityIndicator.centerXAnchor.constraint(equalTo: tableView.centerXAnchor),
             activityIndicator.centerYAnchor.constraint(equalTo: tableView.centerYAnchor)

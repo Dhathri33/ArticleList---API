@@ -20,10 +20,31 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
            let articleViewModel: ArticleViewModelProtocol = ArticleViewModel()
            let articleViewController = ArticleViewController(viewModel: articleViewModel)
            let navigationController = UINavigationController(rootViewController: articleViewController)
+           navigationController.tabBarItem = UITabBarItem(
+            title: "Home", image: UIImage(systemName: "house.fill"), tag: 1)
+           
+           let addArticleViewController = AddArticleViewController()
+           addArticleViewController.tabBarItem = UITabBarItem(
+            title: "Add Article", image: UIImage(systemName: "plus.circle.fill"), tag: 2)
+           
+           let notificationsViewController = NotificationsViewController()
+           notificationsViewController.tabBarItem = UITabBarItem(
+            title: "Notifications", image: UIImage(systemName: "bell.fill"), tag: 3)
+           
+           let profileViewController = ProfileViewController()
+           profileViewController.tabBarItem = UITabBarItem(
+            title: "Profile", image: UIImage(systemName: "person.circle.fill"), tag: 4)
+           
+           let tabBarController = UITabBarController()
+           tabBarController.viewControllers = [navigationController, addArticleViewController, notificationsViewController, profileViewController]
+           
+           tabBarController.tabBar.tintColor = .systemBlue
+           tabBarController.tabBar.unselectedItemTintColor = .secondaryLabel
+           
            let coordinator = ArticleListCoordinator(navigationController: navigationController)
            articleViewController.coordinatorFlowDelegate = coordinator
            self.appCoordinator = coordinator
-           window.rootViewController = navigationController
+           window.rootViewController = tabBarController
            self.window = window
            window.makeKeyAndVisible()
        }
