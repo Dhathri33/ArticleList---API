@@ -37,6 +37,21 @@ class ArticleViewController: UIViewController {
         return tableView
     }()
     
+    private lazy var refreshControl: UIRefreshControl = {
+        let refreshControl = UIRefreshControl()
+        refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh")
+        refreshControl.addTarget(self, action: #selector(didPullToRefresh), for: .valueChanged)
+        return refreshControl
+    }()
+    
+    private let activityIndicator: UIActivityIndicatorView = {
+        let activityIndicator = UIActivityIndicatorView(style: .large)
+        activityIndicator.hidesWhenStopped = true
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        activityIndicator.color = .systemBlue
+        return activityIndicator
+    }()
+    
     var articleViewModel: ArticleViewModelProtocol!
     var coordinatorFlowDelegate: ArticleListCoordinatorProtocol?
     private var searchDebounce: DispatchWorkItem?
@@ -61,14 +76,7 @@ class ArticleViewController: UIViewController {
         super.viewDidLoad()
         setupDelegates()
         setupUI()
-        articleViewModel.getDataFromServer { [weak self] errorState in
-            guard let self = self else { return }
-            guard let _ = errorState else {
-                self.tableView.reloadData()
-                return
-            }
-            self.showAlert(title: "Hacker News", message: articleViewModel.errorMessage)
-        }
+        fetchArticles()
     }
 }
 
@@ -152,6 +160,12 @@ extension ArticleViewController {
         view.backgroundColor = .white
         tableView.tableHeaderView = searchBar
         
+        tableView.refreshControl = refreshControl
+        tableView.alwaysBounceVertical = true
+        tableView.addSubview(activityIndicator)
+        tableView.bringSubviewToFront(activityIndicator)
+        
+        
         let vStack = UIStackView(arrangedSubviews: [titleLabel, tableView])
         vStack.axis = .vertical
         vStack.spacing = 20
@@ -163,7 +177,9 @@ extension ArticleViewController {
             vStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
             vStack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
             tableView.heightAnchor.constraint(equalToConstant: 680),
-            tableView.widthAnchor.constraint(equalToConstant: 393)
+            tableView.widthAnchor.constraint(equalToConstant: 393),
+            activityIndicator.centerXAnchor.constraint(equalTo: tableView.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: tableView.centerYAnchor)
         ])
     }
     
@@ -172,4 +188,36 @@ extension ArticleViewController {
         tableView.delegate = self
         searchBar.delegate = self
     }
+    
+    private func fetchArticles(isRefreshing: Bool = false) {
+        if !isRefreshing {
+            DispatchQueue.main.async {
+                self.activityIndicator.isHidden = false
+                self.activityIndicator.startAnimating()
+            }
+        }
+        articleViewModel.getDataFromServer { [weak self] errorState in
+            guard let self = self else { return }
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.50) {
+                if isRefreshing {
+                    self.refreshControl.endRefreshing()
+                } else {
+                    self.activityIndicator.stopAnimating()
+                }
+                if let _ = errorState {
+                    self.showAlert(title: "Hacker News", message: self.articleViewModel.errorMessage)
+                } else {
+                    self.tableView.reloadData()
+                }
+            }
+        }
+    }
+
+    
+    @objc private func didPullToRefresh() {
+           searchBar.text = nil
+           articleViewModel.applyFilter("")
+           fetchArticles(isRefreshing: true)
+       }
 }
