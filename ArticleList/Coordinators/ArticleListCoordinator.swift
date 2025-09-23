@@ -9,7 +9,7 @@ import UIKit
 protocol ArticleListCoordinatorProtocol {
     func showDetailScreen(article: ArticleDetails,
                           prefetchedImage: UIImage?,
-                          onSave: @escaping ((ArticleDetails?) -> Void?))
+                          delegate: ArticleDetailsDelegate)
 }
 
 final class ArticleListCoordinator: ArticleListCoordinatorProtocol {
@@ -24,11 +24,11 @@ final class ArticleListCoordinator: ArticleListCoordinatorProtocol {
 
     func showDetailScreen(article: ArticleDetails,
                           prefetchedImage: UIImage?,
-                          onSave: @escaping ((ArticleDetails?) -> Void?)) {
+                          delegate: ArticleDetailsDelegate) {
         let detailsVC = DetailsViewController()
         detailsVC.article = article
         detailsVC.prefetchedImage = prefetchedImage
-        detailsVC.closure = onSave
+        detailsVC.articleDelegate = delegate
         navigationController.pushViewController(detailsVC, animated: true)
     }
 }

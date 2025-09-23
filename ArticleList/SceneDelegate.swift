@@ -22,10 +22,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
            let navigationController = UINavigationController(rootViewController: articleViewController)
            navigationController.tabBarItem = UITabBarItem(
             title: "Home", image: UIImage(systemName: "house.fill"), tag: 1)
-           
-           let addArticleViewController = AddArticleViewController()
-           addArticleViewController.tabBarItem = UITabBarItem(
-            title: "Add Article", image: UIImage(systemName: "plus.circle.fill"), tag: 2)
+           let countryViewModel: CountryViewModelProtocol = CountryViewModel()
+           let searchCountryViewController = SearchCountryViewController(viewModel: countryViewModel)
+           searchCountryViewController.tabBarItem = UITabBarItem(
+            title: "Search Country", image: UIImage(systemName: "magnifyingglass"), tag: 2)
            
            let notificationsViewController = NotificationsViewController()
            notificationsViewController.tabBarItem = UITabBarItem(
@@ -36,7 +36,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             title: "Profile", image: UIImage(systemName: "person.circle.fill"), tag: 4)
            
            let tabBarController = UITabBarController()
-           tabBarController.viewControllers = [navigationController, addArticleViewController, notificationsViewController, profileViewController]
+           tabBarController.viewControllers = [navigationController, searchCountryViewController, notificationsViewController, profileViewController]
            
            tabBarController.tabBar.tintColor = .systemBlue
            tabBarController.tabBar.unselectedItemTintColor = .secondaryLabel

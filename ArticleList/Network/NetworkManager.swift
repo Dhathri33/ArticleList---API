@@ -10,6 +10,7 @@ import Foundation
 protocol NetworkManagerProtocol {
     func getData(from serverUrl: String?, closure: @escaping (NetworkState) -> Void)
     func parse(data: Data?) -> [ArticleDetails]
+    func parseCountry(data: Data?) -> [Country]
 }
 
 class NetworkManager: NetworkManagerProtocol {
@@ -50,6 +51,21 @@ class NetworkManager: NetworkManagerProtocol {
             let decoder = JSONDecoder()
             let fetchedResult = try decoder.decode(ArticleList.self, from: data)
             return fetchedResult.articles
+        } catch {
+            print(error)
+        }
+        return []
+    }
+    
+    func parseCountry(data: Data?) -> [Country] {
+        guard let data = data else {
+            print("No data to parse")
+            return []
+        }
+        do {
+            let decoder = JSONDecoder()
+            let fetchedResult = try decoder.decode([Country].self, from: data)
+            return fetchedResult
         } catch {
             print(error)
         }

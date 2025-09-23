@@ -7,12 +7,17 @@
 
 import UIKit
 
+protocol ArticleDetailsDelegate: AnyObject {
+    func receiveUpdatedArticle(_ article: ArticleDetails?)
+}
+
 class DetailsViewController: UIViewController {
     
     //MARK: Properties
     
     var article: ArticleDetails?
-    var closure: ((ArticleDetails?) -> Void?)? = nil
+    var articleDelegate: ArticleDetailsDelegate?
+//    var closure: ((ArticleDetails?) -> Void?)? = nil
     var prefetchedImage: UIImage?
     
     var titleLabel: UILabel = {
@@ -110,8 +115,7 @@ extension DetailsViewController {
     
     @objc func saveComment() {
         article?.comments = commentsTextField.text
-        guard let closure = closure else { return }
-        closure(article)
+        articleDelegate?.receiveUpdatedArticle(article)
         self.navigationController?.popViewController(animated: true)
     }
 }

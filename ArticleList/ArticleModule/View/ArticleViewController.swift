@@ -54,6 +54,7 @@ class ArticleViewController: UIViewController {
     
     var articleViewModel: ArticleViewModelProtocol!
     var coordinatorFlowDelegate: ArticleListCoordinatorProtocol?
+    private var selectedIndexPath: IndexPath?
     private var searchDebounce: DispatchWorkItem?
     private let debounceInterval: TimeInterval = 1.0 // 1s;
 
@@ -102,18 +103,11 @@ extension ArticleViewController: UITableViewDataSource{
 extension ArticleViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
+        selectedIndexPath = indexPath
         let selected = articleViewModel.getArticle(at: indexPath.row)
         let image = (tableView.cellForRow(at: indexPath) as? ArticleTableCell)?.articleImageView.image
-        let closure: ((ArticleDetails?) -> Void?) = { [weak self] updated in
-            guard let self = self, let updated = updated else { return }
-            self.articleViewModel.updateArticleList(row: indexPath.row, updatedArticle: updated)
-            self.tableView.reloadRows(at: [indexPath], with: .none)
-        }
-
-        coordinatorFlowDelegate?.showDetailScreen(
-            article: selected,
-            prefetchedImage: image,
-            onSave: closure)
+        coordinatorFlowDelegate?.showDetailScreen(article: selected, prefetchedImage: image, delegate: self)
+    
     }
 }
 
@@ -175,8 +169,8 @@ extension ArticleViewController {
         NSLayoutConstraint.activate([
             vStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             vStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            vStack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
-            tableView.heightAnchor.constraint(equalToConstant: 600),
+            vStack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -15),
+            tableView.heightAnchor.constraint(equalToConstant: 660),
             tableView.widthAnchor.constraint(equalToConstant: 393),
             activityIndicator.centerXAnchor.constraint(equalTo: tableView.centerXAnchor),
             activityIndicator.centerYAnchor.constraint(equalTo: tableView.centerYAnchor)
@@ -220,4 +214,18 @@ extension ArticleViewController {
            articleViewModel.applyFilter("")
            fetchArticles(isRefreshing: true)
        }
+}
+
+//MARK: Delegate Methods
+
+extension ArticleViewController: ArticleDetailsDelegate {
+    func receiveUpdatedArticle(_ article: ArticleDetails?) {
+        guard let article = article,
+              let row = selectedIndexPath?.row else { return }
+        articleViewModel.updateArticleList(row: row, updatedArticle: article)
+        DispatchQueue.main.async {
+            self.tableView.reloadRows(at: [IndexPath(row: row, section: 0)], with: .none)
+        }
+        selectedIndexPath = nil
+    }
 }
