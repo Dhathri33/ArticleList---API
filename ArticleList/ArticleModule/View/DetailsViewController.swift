@@ -17,7 +17,6 @@ class DetailsViewController: UIViewController {
     
     var article: ArticleDetails?
     var articleDelegate: ArticleDetailsDelegate?
-//    var closure: ((ArticleDetails?) -> Void?)? = nil
     var prefetchedImage: UIImage?
     
     var titleLabel: UILabel = {

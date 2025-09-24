@@ -128,7 +128,7 @@ extension ArticleTableCell {
         
         titleLabel.text = article.author ?? ""
         postDetailsLabel.text = article.description ?? ""
-        dateLabel.text = article.publishedDateOnly
+        dateLabel.text = article.publishedAt
         
         var receivedImageData: Data?
         NetworkManager.shared.getData(from: article.urlToImage, closure: { [weak self] fetchedState in
