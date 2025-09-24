@@ -15,6 +15,7 @@ protocol ArticleViewModelProtocol {
     func getDataFromServer(completion: ((NetworkState?) -> Void)?)
     func applyFilter(_ text: String)
     func updateArticleList(row: Int, updatedArticle: ArticleDetails)
+    func deleteArticle(at index: Int)
 }
 
 class ArticleViewModel: ArticleViewModelProtocol{
@@ -70,6 +71,14 @@ class ArticleViewModel: ArticleViewModelProtocol{
     func updateArticleList(row: Int, updatedArticle: ArticleDetails) {
         articleList[row] = updatedArticle
         visibleList[row] = updatedArticle
+    }
+    
+    func deleteArticle(at index: Int) {
+        guard (index < visibleList.count && index >= 0) else { return }
+               let deletedArticle = visibleList.remove(at: index)
+               if let index = articleList.firstIndex(where: { $0.author == deletedArticle.author }) {
+                   articleList.remove(at: index)
+               }
     }
 }
 

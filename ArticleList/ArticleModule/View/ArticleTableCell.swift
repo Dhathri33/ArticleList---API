@@ -7,11 +7,16 @@
 
 import UIKit
 
+protocol ArticleTableCellDelegate: AnyObject {
+    func didTapOnDeleteButton(_ cell: ArticleTableCell)
+}
+
 class ArticleTableCell: UITableViewCell {
     
     //MARK: Properties
     
     static let reuseIdentifier = "ArticleTableCell"
+    weak var delegate: ArticleTableCellDelegate?
     
     let titleLabel = {
         let titleLabel = UILabel()
@@ -53,12 +58,23 @@ class ArticleTableCell: UITableViewCell {
         articleImageView.setContentCompressionResistancePriority(.required, for: .horizontal)
         return articleImageView
     }()
-        
+    
+    private let deleteButton: UIButton = {
+        let deleteButton = UIButton(type: .system)
+        deleteButton.setImage(UIImage(systemName: "trash"), for: .normal)
+        deleteButton.tintColor = .systemRed
+        deleteButton.setContentHuggingPriority(.required, for: .horizontal)
+        deleteButton.setContentCompressionResistancePriority(.required, for: .horizontal)
+        return deleteButton
+    }()
+    
     //MARK: Initializers for UITableViewCell
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
+        deleteButton.addTarget(self, action: #selector(deleteButtonTapped), for: .touchUpInside)
+        
     }
     
     required init?(coder: NSCoder) {
@@ -87,7 +103,7 @@ extension ArticleTableCell {
         imageStackView.spacing = 8
 
         // Root horizontal stack
-        let hStack = UIStackView(arrangedSubviews: [textStack, imageStackView])
+        let hStack = UIStackView(arrangedSubviews: [textStack, imageStackView, deleteButton])
         hStack.axis = .horizontal
         hStack.alignment = .top
         hStack.spacing = 12
@@ -102,7 +118,9 @@ extension ArticleTableCell {
             articleImageView.widthAnchor.constraint(equalToConstant: 80),
             articleImageView.heightAnchor.constraint(equalToConstant: 80),
             uploadImageView.widthAnchor.constraint(equalToConstant: 16),
-            uploadImageView.heightAnchor.constraint(equalToConstant: 16)
+            uploadImageView.heightAnchor.constraint(equalToConstant: 16),
+            deleteButton.widthAnchor.constraint(equalToConstant: 24),
+            deleteButton.heightAnchor.constraint(equalToConstant: 24),
             ])
     }
     
@@ -131,5 +149,9 @@ extension ArticleTableCell {
                 self.articleImageView.image = UIImage(data: receivedImageData)
             }
         })
+    }
+    
+    @objc func deleteButtonTapped(){
+        delegate?.didTapOnDeleteButton(self)
     }
 }

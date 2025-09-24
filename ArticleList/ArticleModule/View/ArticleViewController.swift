@@ -93,6 +93,7 @@ extension ArticleViewController: UITableViewDataSource{
         guard let cell = tableView.dequeueReusableCell(withIdentifier: ArticleTableCell.reuseIdentifier, for: indexPath) as? ArticleTableCell else {
             return UITableViewCell()
         }
+        cell.delegate = self
         cell.loadCellData(article: articleViewModel.getArticle(at: indexPath.row))
         return cell
     }
@@ -229,3 +230,12 @@ extension ArticleViewController: ArticleDetailsDelegate {
         selectedIndexPath = nil
     }
 }
+
+extension ArticleViewController: ArticleTableCellDelegate {
+    func didTapOnDeleteButton(_ cell: ArticleTableCell) {
+        guard let indexPath = tableView.indexPath(for: cell) else { return }
+        articleViewModel.deleteArticle(at: indexPath.row)
+        tableView.deleteRows(at: [indexPath], with: .automatic)
+    }
+}
+
