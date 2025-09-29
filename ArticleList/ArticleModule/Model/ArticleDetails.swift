@@ -7,7 +7,7 @@
 @propertyWrapper
 struct DateOnly: Decodable {
     private var value: String?
-    // Property Wrapper
+    // Property Wrapped
     var wrappedValue: String? {
         guard let value = value, value.count >= 10 else { return nil }
         return String(value.prefix(10))
