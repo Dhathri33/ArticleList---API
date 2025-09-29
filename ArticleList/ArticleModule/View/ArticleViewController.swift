@@ -78,6 +78,7 @@ class ArticleViewController: UIViewController {
         setupDelegates()
         setupUI()
         fetchArticles()
+        articleViewModel.someFunction() // practice
     }
 }
 

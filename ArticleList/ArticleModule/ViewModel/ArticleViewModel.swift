@@ -16,6 +16,7 @@ protocol ArticleViewModelProtocol {
     func applyFilter(_ text: String)
     func updateArticleList(row: Int, updatedArticle: ArticleDetails)
     func deleteArticle(at index: Int)
+    func someFunction()
 }
 
 class ArticleViewModel: ArticleViewModelProtocol{
@@ -79,6 +80,10 @@ class ArticleViewModel: ArticleViewModelProtocol{
                if let index = articleList.firstIndex(where: { $0.author == deletedArticle.author }) {
                    articleList.remove(at: index)
                }
+    }
+    
+    func someFunction() {
+        print("This is some function, try to implement it")
     }
 }
 
