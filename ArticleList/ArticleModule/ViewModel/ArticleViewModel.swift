@@ -83,7 +83,9 @@ class ArticleViewModel: ArticleViewModelProtocol{
     }
     
     func someFunction() {
-        print("This is some function, try to implement it")
+        let inputs = ["1", "2", "3", "4"]
+        let sum = inputs.compactMap { Int($0) }.reduce(0, +)
+        print("Sum of numbers in array of strings: \(sum)")
     }
 }
 
