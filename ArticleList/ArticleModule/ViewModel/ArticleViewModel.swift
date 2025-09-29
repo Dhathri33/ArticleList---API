@@ -16,7 +16,7 @@ protocol ArticleViewModelProtocol {
     func applyFilter(_ text: String)
     func updateArticleList(row: Int, updatedArticle: ArticleDetails)
     func deleteArticle(at index: Int)
-    func sathvikaSumFunction()
+    func someFunction()
 }
 
 class ArticleViewModel: ArticleViewModelProtocol{
@@ -82,10 +82,10 @@ class ArticleViewModel: ArticleViewModelProtocol{
                }
     }
     
-    func sathvikaSumFunction() {
-        let numAr = [1,2,3,4,5]
-        let sum = numAr.filter{ $0 % 2 == 0}.reduce(0, +)
-        print(sum)
+    func someFunction() {
+        let inputs = ["1", "2", "3", "4"]
+        let sum = inputs.compactMap { Int($0) }.reduce(0, +)
+        print("Sum of numbers in array of strings: \(sum)")
     }
 }
 
