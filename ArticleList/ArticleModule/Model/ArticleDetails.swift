@@ -29,7 +29,7 @@ struct ArticleDetails: Decodable {
     var author: String?
     let description: String?
     let urlToImage: String?
-    
+    // Property Wrapper
     @DateOnly var publishedAt: String?
     
     var comments: String? {
