@@ -16,7 +16,6 @@ protocol ArticleViewModelProtocol {
     func applyFilter(_ text: String)
     func updateArticleList(row: Int, updatedArticle: ArticleDetails)
     func deleteArticle(at index: Int)
-    func someFunction()
 }
 
 class ArticleViewModel: ArticleViewModelProtocol{
@@ -80,12 +79,6 @@ class ArticleViewModel: ArticleViewModelProtocol{
                if let index = articleList.firstIndex(where: { $0.author == deletedArticle.author }) {
                    articleList.remove(at: index)
                }
-    }
-    
-    func someFunction() {
-        let inputs = ["1", "2", "3", "4"]
-        let sum = inputs.compactMap { Int($0) }.reduce(0, +)
-        print("Sum of numbers in array of strings: \(sum)")
     }
 }
 
