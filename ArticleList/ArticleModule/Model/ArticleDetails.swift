@@ -7,11 +7,13 @@
 @propertyWrapper
 struct DateOnly: Decodable {
     private var value: String?
-    // Property Wrapped
+    //Used Property Wrapper
     var wrappedValue: String? {
         guard let value = value, value.count >= 10 else { return nil }
         return String(value.prefix(10))
     }
+    
+    //MARK: Initializers
     
     init(wrappedValue: String?) {
         self.value = wrappedValue
@@ -27,7 +29,7 @@ struct ArticleDetails: Decodable {
     var author: String?
     let description: String?
     let urlToImage: String?
-    
+    // Property Wrapper
     @DateOnly var publishedAt: String?
     
     var comments: String? {
