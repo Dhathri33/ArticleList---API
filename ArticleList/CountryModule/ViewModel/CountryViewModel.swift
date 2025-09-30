@@ -7,13 +7,14 @@
 
 import Foundation
 
+@MainActor
 protocol CountryViewModelProtocol {
     var countryList: [Country] { get set}
     var visibleList: [Country] { get set}
     var errorMessage: String { get }
     func getNumberOfRows() -> Int
     func getCountry(at index: Int) -> Country
-    func getDataFromServer(completion: ((NetworkState?) -> Void)?)
+    func getDataFromServer() async -> NetworkState?
     func applyFilter(_ text: String)
 }
 
@@ -35,25 +36,19 @@ class CountryViewModel: CountryViewModelProtocol {
     func getCountry(at index: Int) -> Country {
         return visibleList[index]
     }
+    
+    func getDataFromServer() async -> NetworkState? {
+        let fetchedState = await networkManager.getData(from: Server.endPointCountry.rawValue)
         
-    func getDataFromServer(completion: ((NetworkState?) -> Void)?) {
-        networkManager.getData(from: Server.endPointCountry.rawValue) { [weak self] fetchedState in
-            guard let self = self else { return }
-            
-            switch fetchedState {
-            case .isLoading, .invalidURL, .errorFetchingData, .noDataFromServer:
-                errorState = fetchedState
-                break
-            case .success(let fetchedData):
-                self.countryList = networkManager.parseCountry(data: fetchedData)
-                self.visibleList = countryList
-                break
-            }
-            
-            DispatchQueue.main.async {
-                completion?(self.errorState)
-            }
+        switch fetchedState {
+        case .isLoading, .invalidURL, .errorFetchingData, .noDataFromServer:
+            errorState = fetchedState
+        case .success(let fetchedData):
+            self.countryList = networkManager.parseCountry(data: fetchedData)
+            self.visibleList = countryList
+            errorState = nil
         }
+        return self.errorState
     }
     
     func applyFilter(_ text: String) {

@@ -8,9 +8,10 @@
 import Foundation
 
 protocol NetworkManagerProtocol {
-    func getData(from serverUrl: String?, closure: @escaping (NetworkState) -> Void)
+    func getData(from serverUrl: String?) async -> NetworkState
     func parse(data: Data?) -> [ArticleDetails]
     func parseCountry(data: Data?) -> [Country]
+    
 }
 
 class NetworkManager: NetworkManagerProtocol {
@@ -18,28 +19,21 @@ class NetworkManager: NetworkManagerProtocol {
     static let shared = NetworkManager()
     var state: NetworkState = .isLoading
     
-    func getData(from serverUrl: String?, closure: @escaping (NetworkState) -> Void) {
+    func getData(from serverUrl: String?) async -> NetworkState {
+        
         guard let imageUrl = serverUrl, let serverURL = URL(string: imageUrl) else {
             state = .invalidURL
-            closure(state)
-            return
+            return state
         }
         
-        URLSession.shared.dataTask(with: serverURL) { data, response, error in
-            if let _ = error {
-                self.state = .errorFetchingData
-                closure(self.state)
-                return
-            }
-            
-            guard let data else {
-                self.state = .noDataFromServer
-                closure(self.state)
-                return
-            }
-            self.state = .success(data)
-            closure(self.state)
-        }.resume()
+        do {
+            let (data, _ ) = try await URLSession.shared.data(from: serverURL)
+            state = .success(data)
+            return state
+        } catch {
+            state = .errorFetchingData
+            return state
+        }
     }
     
     func parse(data: Data?) -> [ArticleDetails] {

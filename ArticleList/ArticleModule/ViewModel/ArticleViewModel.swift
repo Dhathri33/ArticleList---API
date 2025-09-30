@@ -6,13 +6,14 @@
 //
 import Foundation
 
+@MainActor
 protocol ArticleViewModelProtocol {
     var articleList: [ArticleDetails] { get set}
     var visibleList: [ArticleDetails] { get set}
     var errorMessage: String { get }
     func getNumberOfRows() -> Int
     func getArticle(at index: Int) -> ArticleDetails
-    func getDataFromServer(completion: ((NetworkState?) -> Void)?)
+    func getDataFromServer() async -> NetworkState?
     func applyFilter(_ text: String)
     func updateArticleList(row: Int, updatedArticle: ArticleDetails)
     func deleteArticle(at index: Int)
@@ -37,24 +38,18 @@ class ArticleViewModel: ArticleViewModelProtocol{
         return visibleList[index]
     }
         
-    func getDataFromServer(completion: ((NetworkState?) -> Void)?) {
-        networkManager.getData(from: Server.endPoint.rawValue) { [weak self] fetchedState in
-            guard let self = self else { return }
-            
-            switch fetchedState {
-            case .isLoading, .invalidURL, .errorFetchingData, .noDataFromServer:
-                errorState = fetchedState
-                break
-            case .success(let fetchedData):
-                self.articleList = networkManager.parse(data: fetchedData)
-                self.visibleList = articleList
-                break
-            }
-            
-            DispatchQueue.main.async {
-                completion?(self.errorState)
-            }
+    func getDataFromServer() async -> NetworkState? {
+        let fetchedState = await networkManager.getData(from: Server.endPoint.rawValue)
+        
+        switch fetchedState {
+        case .isLoading, .invalidURL, .errorFetchingData, .noDataFromServer:
+            errorState = fetchedState
+        case .success(let fetchedData):
+            self.articleList = networkManager.parse(data: fetchedData)
+            self.visibleList = articleList
+            errorState = nil
         }
+        return self.errorState
     }
     
     func applyFilter(_ text: String) {

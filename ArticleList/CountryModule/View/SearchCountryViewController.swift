@@ -138,23 +138,22 @@ extension SearchCountryViewController {
         searchBar.delegate = self
     }
     
+    @MainActor
     private func fetchArticles(isRefreshing: Bool = false) {
-        countryViewModel.getDataFromServer { [weak self] errorState in
-            guard let self = self else { return }
-
-            DispatchQueue.main.async() {
-                if isRefreshing {
-                    self.refreshControl.endRefreshing()
-                }
-                if let _ = errorState {
-                    self.showAlert(title: "Hacker News", message: self.countryViewModel.errorMessage)
-                } else {
-                    self.tableView.reloadData()
-                }
+        Task {
+            let errorState = await countryViewModel.getDataFromServer()
+            
+            if isRefreshing {
+                self.refreshControl.endRefreshing()
+            }
+            if let _ = errorState {
+                self.showAlert(title: "Hacker News", message: self.countryViewModel.errorMessage)
+            } else {
+                self.tableView.reloadData()
             }
         }
     }
-
+    
     @objc func didPullToRefresh() {
            searchBar.text = nil
            countryViewModel.applyFilter("")

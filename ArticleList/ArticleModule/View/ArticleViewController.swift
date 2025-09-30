@@ -160,7 +160,6 @@ extension ArticleViewController {
         tableView.addSubview(activityIndicator)
         tableView.bringSubviewToFront(activityIndicator)
         
-        
         let vStack = UIStackView(arrangedSubviews: [titleLabel, tableView])
         vStack.axis = .vertical
         vStack.spacing = 10
@@ -184,6 +183,7 @@ extension ArticleViewController {
         searchBar.delegate = self
     }
     
+    @MainActor
     private func fetchArticles(isRefreshing: Bool = false) {
         if !isRefreshing {
             DispatchQueue.main.async {
@@ -191,25 +191,24 @@ extension ArticleViewController {
                 self.activityIndicator.startAnimating()
             }
         }
-        articleViewModel.getDataFromServer { [weak self] errorState in
-            guard let self = self else { return }
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.50) {
-                if isRefreshing {
-                    self.refreshControl.endRefreshing()
-                } else {
-                    self.activityIndicator.stopAnimating()
-                }
-                if let _ = errorState {
-                    self.showAlert(title: "Hacker News", message: self.articleViewModel.errorMessage)
-                } else {
-                    self.tableView.reloadData()
-                }
+        
+        Task {
+            let errorState = await articleViewModel.getDataFromServer()
+            
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            if isRefreshing {
+                self.refreshControl.endRefreshing()
+            } else {
+                self.activityIndicator.stopAnimating()
+            }
+            if let _ = errorState {
+                self.showAlert(title: "Hacker News", message: self.articleViewModel.errorMessage)
+            } else {
+                self.tableView.reloadData()
             }
         }
-    }
+}
 
-    
     @objc private func didPullToRefresh() {
            searchBar.text = nil
            articleViewModel.applyFilter("")

@@ -74,7 +74,6 @@ class ArticleTableCell: UITableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
         deleteButton.addTarget(self, action: #selector(deleteButtonTapped), for: .touchUpInside)
-        
     }
     
     required init?(coder: NSCoder) {
@@ -124,33 +123,24 @@ extension ArticleTableCell {
             ])
     }
     
+    @MainActor
     func loadCellData(article: ArticleDetails) {
         
         titleLabel.text = article.author ?? ""
         postDetailsLabel.text = article.description ?? ""
         dateLabel.text = article.publishedAt
         
-        var receivedImageData: Data?
-        NetworkManager.shared.getData(from: article.urlToImage, closure: { [weak self] fetchedState in
-            guard let self = self else { return }
-            switch fetchedState {
-            case .isLoading, .invalidURL, .errorFetchingData, .noDataFromServer:
-                DispatchQueue.main.async {
-                    self.articleImageView.image = UIImage(systemName: "photo.trianglebadge.exclamationmark.fill")
-                }
-                break
+        Task {
+            let state = await NetworkManager.shared.getData(from: article.urlToImage)
+            switch state {
             case .success(let fetchedData):
-                receivedImageData = fetchedData
-                break
+                self.articleImageView.image = UIImage(data: fetchedData)
+            case .errorFetchingData, .isLoading, .invalidURL, .noDataFromServer:
+                self.articleImageView.image = UIImage(systemName: "photo.trianglebadge.exclamationmark.fill")
             }
-            // convert imageData into UIImage
-            DispatchQueue.main.async {
-                guard let receivedImageData = receivedImageData else { return }
-                self.articleImageView.image = UIImage(data: receivedImageData)
-            }
-        })
+        }
     }
-    
+
     @objc func deleteButtonTapped(){
         delegate?.didTapOnDeleteButton(self)
     }
