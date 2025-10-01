@@ -16,37 +16,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
        func scene(_ scene: UIScene, willConnectTo session: UISceneSession,
                   options connectionOptions: UIScene.ConnectionOptions) {
            guard let windowScene = (scene as? UIWindowScene) else { return }
-           let window = UIWindow(windowScene: windowScene)
-           let articleViewModel: ArticleViewModelProtocol = ArticleViewModel()
-           let articleViewController = ArticleViewController(viewModel: articleViewModel)
-           let navigationController = UINavigationController(rootViewController: articleViewController)
-           navigationController.tabBarItem = UITabBarItem(
-            title: "Home", image: UIImage(systemName: "house.fill"), tag: 1)
-           let countryViewModel: CountryViewModelProtocol = CountryViewModel()
-           let searchCountryViewController = SearchCountryViewController(viewModel: countryViewModel)
-           searchCountryViewController.tabBarItem = UITabBarItem(
-            title: "Search Country", image: UIImage(systemName: "magnifyingglass"), tag: 2)
-           
-           let notificationsViewController = NotificationsViewController()
-           notificationsViewController.tabBarItem = UITabBarItem(
-            title: "Notifications", image: UIImage(systemName: "bell.fill"), tag: 3)
-           
-           let profileViewController = ProfileViewController()
-           profileViewController.tabBarItem = UITabBarItem(
-            title: "Profile", image: UIImage(systemName: "person.circle.fill"), tag: 4)
-           
-           let tabBarController = UITabBarController()
-           tabBarController.viewControllers = [navigationController, searchCountryViewController, notificationsViewController, profileViewController]
-           
-           tabBarController.tabBar.tintColor = .systemBlue
-           tabBarController.tabBar.unselectedItemTintColor = .secondaryLabel
-           
-           let coordinator = ArticleListCoordinator(navigationController: navigationController)
-           articleViewController.coordinatorFlowDelegate = coordinator
-           self.appCoordinator = coordinator
-           window.rootViewController = tabBarController
-           self.window = window
-           window.makeKeyAndVisible()
+            let window = UIWindow(windowScene: windowScene)
+            self.window = window
+           if let savedUsername = UserDefaultStorage.shared.getString(forKey: UDKeys.username), !savedUsername.isEmpty {
+               let tabBar = createMainTabBar(username: savedUsername)
+               window.rootViewController = tabBar
+              } else {
+                let loginViewController = LoginViewController()
+                window.rootViewController = loginViewController
+              }
+        window.makeKeyAndVisible()
        }
 
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -76,6 +55,45 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // to restore the scene back to its current state.
     }
 
+}
 
+//MARK: Helper functions
+
+extension SceneDelegate {
+    
+    func createMainTabBar(username: String?) -> UITabBarController {
+        let articleViewModel: ArticleViewModelProtocol = ArticleViewModel()
+        let articleVC = ArticleViewController(viewModel: articleViewModel)
+        let nav = UINavigationController(rootViewController: articleVC)
+        nav.tabBarItem = UITabBarItem(title: "Home", image: UIImage(systemName: "house.fill"), tag: 1)
+
+        let countryVM: CountryViewModelProtocol = CountryViewModel()
+        let searchCountryVC = SearchCountryViewController(viewModel: countryVM)
+        searchCountryVC.tabBarItem = UITabBarItem(title: "Search Country", image: UIImage(systemName: "magnifyingglass"), tag: 2)
+
+        let notificationsVC = NotificationsViewController()
+        notificationsVC.tabBarItem = UITabBarItem(title: "Notifications", image: UIImage(systemName: "bell.fill"), tag: 3)
+
+        let profileVC = ProfileViewController()
+        let profileTitle = (username?.isEmpty == false) ? username! : "Profile"
+        profileVC.tabBarItem = UITabBarItem(title: profileTitle, image: UIImage(systemName: "person.circle.fill"), tag: 4)
+
+        let tabBarController = UITabBarController()
+        tabBarController.viewControllers = [nav, searchCountryVC, notificationsVC, profileVC]
+        tabBarController.tabBar.tintColor = .systemBlue
+        tabBarController.tabBar.unselectedItemTintColor = .secondaryLabel
+
+        let coordinator = ArticleListCoordinator(navigationController: nav)
+        articleVC.coordinatorFlowDelegate = coordinator
+        self.appCoordinator = coordinator
+
+        return tabBarController
+    }
+    func showMainInterface() {
+        let name = UserDefaultStorage.shared.getString(forKey: UDKeys.username)
+        let tabBar = createMainTabBar(username: name)
+        guard let window = self.window else { return }
+        window.rootViewController = tabBar
+    }
 }
 
