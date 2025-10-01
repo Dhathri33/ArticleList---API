@@ -123,17 +123,25 @@ extension ArticleTableCell {
             ])
     }
     
-    @MainActor
     func loadCellData(article: ArticleDetails) {
         
         titleLabel.text = article.author ?? ""
         postDetailsLabel.text = article.description ?? ""
         dateLabel.text = article.publishedAt
+                    
+        if let imagePath = article.urlToImage as? NSString, let cachedImage =
+            NSCacheStorage.getImage(from: imagePath) {
+            self.articleImageView.image = cachedImage
+            return
+        }
         
         Task {
             let state = await NetworkManager.shared.getData(from: article.urlToImage)
             switch state {
             case .success(let fetchedData):
+                if let downloadImage = UIImage(data: fetchedData), let imagePath = article.urlToImage as? NSString {
+                    NSCacheStorage.setImage(downloadImage, to: imagePath)
+                }
                 self.articleImageView.image = UIImage(data: fetchedData)
             case .errorFetchingData, .isLoading, .invalidURL, .noDataFromServer:
                 self.articleImageView.image = UIImage(systemName: "photo.trianglebadge.exclamationmark.fill")
