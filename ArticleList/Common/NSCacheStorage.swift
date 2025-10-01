@@ -8,8 +8,12 @@
 import UIKit
 
 class NSCacheStorage {
-    
-    static let cache = NSCache<NSString, UIImage>()
+        
+    static let cache = {
+            let cache = NSCache<NSString, UIImage>()
+            cache.countLimit = 5
+            return cache
+        }()
     
     static func getImage(from urlString: NSString) -> UIImage? {
         guard let cachedImage = NSCacheStorage.cache.object(forKey: urlString) else {
