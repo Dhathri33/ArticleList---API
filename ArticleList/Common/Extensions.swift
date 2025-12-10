@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CoreData
 
 extension UIViewController {
     func showAlert(title: String, message: String) {
@@ -21,5 +22,24 @@ extension UIViewController {
         }))
         alertController.addAction(UIAlertAction(title: "OK", style: .default))
         self.present(alertController, animated: true)
+    }
+}
+
+extension CountryCore {
+    func toModel() -> Country {
+        return Country(
+            capital: self.capital ?? "",
+            code: self.code ?? "",
+            name: self.name ?? "",
+            region: self.region ?? ""
+        )
+    }
+    
+    static func fromModel(_ model: Country, context: NSManagedObjectContext) {
+        let item = CountryCore(context: context)
+        item.name = model.name
+        item.capital = model.capital
+        item.region = model.region
+        item.code = model.code
     }
 }

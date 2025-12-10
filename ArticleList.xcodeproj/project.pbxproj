@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		3A1D705E2EE9D60800A2E836 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A1D705D2EE9D60800A2E836 /* CoreData.framework */; };
+		3A1D706C2EE9DD3A00A2E836 /* CountryCore+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1D706B2EE9DD3A00A2E836 /* CountryCore+CoreDataProperties.swift */; };
+		3A1D706D2EE9DD3A00A2E836 /* CountryCore+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A1D706A2EE9DD3A00A2E836 /* CountryCore+CoreDataClass.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -29,6 +31,8 @@
 
 /* Begin PBXFileReference section */
 		3A1D705D2EE9D60800A2E836 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		3A1D706A2EE9DD3A00A2E836 /* CountryCore+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CountryCore+CoreDataClass.swift"; sourceTree = "<group>"; };
+		3A1D706B2EE9DD3A00A2E836 /* CountryCore+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CountryCore+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		3A5D1B602E6F703500FC83B6 /* ArticleList.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ArticleList.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3A5D1B762E6F703800FC83B6 /* ArticleListTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ArticleListTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3A5D1B802E6F703800FC83B6 /* ArticleListUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ArticleListUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -102,6 +106,8 @@
 		3A5D1B572E6F703500FC83B6 = {
 			isa = PBXGroup;
 			children = (
+				3A1D706A2EE9DD3A00A2E836 /* CountryCore+CoreDataClass.swift */,
+				3A1D706B2EE9DD3A00A2E836 /* CountryCore+CoreDataProperties.swift */,
 				3A5D1B622E6F703500FC83B6 /* ArticleList */,
 				3A5D1B792E6F703800FC83B6 /* ArticleListTests */,
 				3A5D1B832E6F703800FC83B6 /* ArticleListUITests */,
@@ -258,6 +264,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3A1D706C2EE9DD3A00A2E836 /* CountryCore+CoreDataProperties.swift in Sources */,
+				3A1D706D2EE9DD3A00A2E836 /* CountryCore+CoreDataClass.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

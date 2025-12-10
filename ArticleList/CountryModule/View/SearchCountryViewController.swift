@@ -142,12 +142,36 @@ extension SearchCountryViewController {
     
     @MainActor
     private func fetchArticles(isRefreshing: Bool = false) {
-        Task {
-            let errorState = await countryViewModel.getDataFromServer()
-            
+
+        if !ConnectivityManager.shared.isConnected {
             if isRefreshing {
                 self.refreshControl.endRefreshing()
             }
+
+            countryViewModel.loadFromCache()
+
+            if countryViewModel.getNumberOfRows() > 0 {
+                self.tableView.reloadData()
+                self.showAlert(
+                    title: "Offline Mode",
+                    message: "No internet connection. Showing saved country list."
+                )
+            } else {
+                self.showAlert(
+                    title: "Offline Mode",
+                    message: "No internet connection and no saved data available."
+                )
+            }
+            return
+        }
+
+        Task {
+            let errorState = await countryViewModel.getDataFromServer()
+
+            if isRefreshing {
+                self.refreshControl.endRefreshing()
+            }
+
             if let _ = errorState {
                 if self.retryCount < self.maxRetries {
                     self.showRetryAlert(
@@ -158,14 +182,28 @@ extension SearchCountryViewController {
                         self.fetchArticles()
                     }
                 } else {
-                    self.showAlert(title: "Hacker News", message: self.countryViewModel.errorMessage)
+                    countryViewModel.loadFromCache()
+
+                    if countryViewModel.getNumberOfRows() > 0 {
+                        tableView.reloadData()
+                        showAlert(
+                            title: "Offline Data",
+                            message: "Could not reach server. Showing saved country list."
+                        )
+                    } else {
+                        showAlert(
+                            title: "Hacker News",
+                            message: countryViewModel.errorMessage
+                        )
+                    }
                 }
             } else {
-                self.retryCount = 0
-                self.tableView.reloadData()
+                retryCount = 0
+                tableView.reloadData()
             }
         }
     }
+
     
     @objc func didPullToRefresh() {
            searchBar.text = nil

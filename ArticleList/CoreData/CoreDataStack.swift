@@ -15,7 +15,7 @@ class CoreDataStack {
 
     lazy var persistentContainer: NSPersistentContainer = {
 
-        let container = NSPersistentContainer(name: "Model")
+        let container = NSPersistentContainer(name: "CountryModel")
 
         container.loadPersistentStores { _, error in
             if let error = error as NSError? {

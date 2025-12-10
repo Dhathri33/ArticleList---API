@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreData
 
 @MainActor
 protocol CountryViewModelProtocol {
@@ -16,6 +17,8 @@ protocol CountryViewModelProtocol {
     func getCountry(at index: Int) -> Country
     func getDataFromServer() async -> NetworkState?
     func applyFilter(_ text: String)
+    func loadFromCache()
+    func saveToCache(countries: [Country])
 }
 
 class CountryViewModel: CountryViewModelProtocol {
@@ -24,6 +27,7 @@ class CountryViewModel: CountryViewModelProtocol {
     var visibleList: [Country] = []
     private let networkManager: NetworkManagerProtocol
     var errorState: NetworkState?
+    private let context = CoreDataStack.shared.context
     
     init(networkManager: NetworkManagerProtocol = NetworkManager.shared) {
         self.networkManager = networkManager
@@ -47,6 +51,8 @@ class CountryViewModel: CountryViewModelProtocol {
             self.countryList = networkManager.parseCountry(data: fetchedData)
             self.visibleList = countryList
             errorState = nil
+            saveToCache(countries: countryList)
+
         }
         return self.errorState
     }
@@ -59,6 +65,40 @@ class CountryViewModel: CountryViewModelProtocol {
             $0.name.lowercased().contains(q) || $0.capital.lowercased().contains(q)
         }
     }
+    
+    func saveToCache(countries: [Country]) {
+        let fetch: NSFetchRequest<NSFetchRequestResult> = CountryCore.fetchRequest()
+        let delete = NSBatchDeleteRequest(fetchRequest: fetch)
+
+        do {
+            try context.execute(delete)
+        } catch {
+            print("Failed to clear old cache:", error)
+        }
+
+        for country in countries {
+            CountryCore.fromModel(country, context: context)
+        }
+
+        do {
+            try context.save()
+        } catch {
+            print("Failed to save cache:", error)
+        }
+    }
+    
+    func loadFromCache() {
+        let request: NSFetchRequest<CountryCore> = CountryCore.fetchRequest()
+        do {
+            let stored = try context.fetch(request)
+            let models = stored.map { $0.toModel() }
+            self.countryList = models
+            self.visibleList = models
+        } catch {
+            print("Failed to load cache:", error)
+        }
+    }
+
 }
 
 extension CountryViewModel {
