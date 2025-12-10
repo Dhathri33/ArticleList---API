@@ -6,6 +6,7 @@
 //
 
 import UIKit
+//import MBProgressHUD
 
 class ArticleViewController: UIViewController {
     
@@ -57,6 +58,7 @@ class ArticleViewController: UIViewController {
     private var selectedIndexPath: IndexPath?
     private var searchDebounce: DispatchWorkItem?
     private let debounceInterval: TimeInterval = 1.0 // 1s;
+   // var progressBar: MBProgressHUD?
 
     deinit {
         searchDebounce?.cancel()
@@ -75,6 +77,7 @@ class ArticleViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+     //   progressBar = MBProgressHUD.showAdded(to: self.view, animated: true)
         setupDelegates()
         setupUI()
         fetchArticles()
@@ -186,6 +189,8 @@ extension ArticleViewController {
     @MainActor
     private func fetchArticles(isRefreshing: Bool = false) {
         if !isRefreshing {
+//            progressBar?.show(animated: true)
+//            progressBar?.label.text = "Loading..."
             DispatchQueue.main.async {
                 self.activityIndicator.isHidden = false
                 self.activityIndicator.startAnimating()
@@ -199,7 +204,8 @@ extension ArticleViewController {
             if isRefreshing {
                 self.refreshControl.endRefreshing()
             } else {
-                self.activityIndicator.stopAnimating()
+               self.activityIndicator.stopAnimating()
+                //progressBar?.hide(animated: true)
             }
             if let _ = errorState {
                 self.showAlert(title: "Hacker News", message: self.articleViewModel.errorMessage)

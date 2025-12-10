@@ -11,6 +11,9 @@ class SearchCountryViewController: UIViewController {
     
     //MARK: Properties
     
+    private var retryCount = 0
+    private let maxRetries = 3
+    
     let titleLabel = {
         let titleLabel = UILabel()
         titleLabel.text = "Country"
@@ -61,7 +64,6 @@ class SearchCountryViewController: UIViewController {
         setupUI()
         fetchArticles()
     }
-
 }
 
 //MARK: TableView DataSource Methods
@@ -147,8 +149,19 @@ extension SearchCountryViewController {
                 self.refreshControl.endRefreshing()
             }
             if let _ = errorState {
-                self.showAlert(title: "Hacker News", message: self.countryViewModel.errorMessage)
+                if self.retryCount < self.maxRetries {
+                    self.showRetryAlert(
+                        title: "Hacker News",
+                        message: self.countryViewModel.errorMessage
+                    ) {
+                        self.retryCount += 1
+                        self.fetchArticles()
+                    }
+                } else {
+                    self.showAlert(title: "Hacker News", message: self.countryViewModel.errorMessage)
+                }
             } else {
+                self.retryCount = 0
                 self.tableView.reloadData()
             }
         }
